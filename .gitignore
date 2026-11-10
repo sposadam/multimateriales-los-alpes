@@ -33,3 +33,6 @@ movimientos-*.csv
 # Reportes de pruebas y registros de CI
 reports/
 docker-compose.log
+
+# Documento de entrega (se entrega aparte, no se versiona)
+entrega/
