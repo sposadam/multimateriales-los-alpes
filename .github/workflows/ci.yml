@@ -1,0 +1,65 @@
+# ==========================================================================
+# Integración continua — se ejecuta en cada push y pull request.
+# Construye las imágenes, levanta los contenedores con Docker Compose y
+# prueba la comunicación app -> db por nombre de servicio.
+# ==========================================================================
+name: CI Docker
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    name: Construir y probar contenedores
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Crear .env de CI (contraseña aleatoria, sin secretos en el repositorio)
+        run: |
+          cp .env.example .env
+          sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci_$(openssl rand -hex 16)/" .env
+          sed -i "s/^SEED_DEMO=.*/SEED_DEMO=true/" .env
+
+      - name: Versiones de Docker
+        run: |
+          docker version
+          docker compose version
+
+      - name: Pruebas unitarias (etapa "test" del Dockerfile)
+        run: docker build --target test -t multimateriales-app:test .
+
+      - name: Construir imágenes (docker compose build)
+        run: docker compose build
+
+      - name: Levantar contenedores (docker compose up)
+        run: docker compose up -d --wait --wait-timeout 120
+
+      - name: Estado de los contenedores
+        run: docker compose ps
+
+      - name: Comunicación app -> db por nombre de servicio
+        run: |
+          echo "Resolución DNS del servicio 'db' desde el contenedor app:"
+          docker compose exec -T app getent hosts db
+          echo "La app consulta PostgreSQL usando DB_HOST=db:"
+          docker compose exec -T app wget -qO- http://127.0.0.1:3000/api/info
+
+      - name: Pruebas de integración (ida y vuelta API <-> PostgreSQL)
+        run: |
+          docker run --rm --network multimateriales_backend \
+            -e API_URL=http://app:3000 multimateriales-app:test npm run test:integration
+
+      - name: Registros de los contenedores
+        if: always()
+        run: docker compose logs --no-color
+
+      - name: Apagar y limpiar
+        if: always()
+        run: docker compose down -v --remove-orphans
