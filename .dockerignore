@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gitattributes
+.claude
+.env
+.env.*
+**/node_modules
+docs
+*.md
+Jenkinsfile
+docker-compose*.yml
+respaldo-*.json
+*.csv
+*.log
