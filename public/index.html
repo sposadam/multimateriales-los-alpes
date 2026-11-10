@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MultiMateriales Los Alpes · Inventario</title>
+  <meta name="description" content="Aplicación web para controlar el inventario de una bodega de materiales de construcción: productos con imágenes, entradas, salidas, ajustes, kardex y proveedores.">
+  <meta name="theme-color" content="#16181d">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    // Aplica el tema antes de pintar para evitar parpadeos.
+    (function () {
+      var t = null;
+      try { t = JSON.parse(localStorage.getItem('mmalpes:pref:theme')); } catch (e) {}
+      if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#view">Saltar al contenido</a>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+      <div class="brand">
+        <img class="brand-logo" src="assets/favicon.svg" alt="" width="38" height="38">
+        <div class="brand-text">
+          <strong>MultiMateriales<br>Los Alpes</strong>
+          <small id="companyName">Bodega Central</small>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="#/panel" data-route="panel"><span data-icon="dashboard"></span>Panel</a>
+        <a href="#/inventario" data-route="inventario"><span data-icon="box"></span>Inventario</a>
+        <a href="#/movimientos" data-route="movimientos"><span data-icon="swap"></span>Movimientos</a>
+        <a href="#/proveedores" data-route="proveedores"><span data-icon="truck"></span>Proveedores</a>
+        <a href="#/configuracion" data-route="configuracion"><span data-icon="settings"></span>Configuración</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="nav-btn" id="themeToggle" type="button"></button>
+        <p class="storage-note" id="dbStatus"><span data-icon="database"></span>Conectando con el servidor…</p>
+      </div>
+    </aside>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Abrir menú"><span data-icon="menu"></span></button>
+        <div class="page-heading">
+          <h1 id="pageTitle">Panel</h1>
+          <p id="pageSubtitle"></p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-success" id="quickIn" type="button"><span data-icon="in"></span><span class="hide-sm">Entrada</span></button>
+          <button class="btn btn-danger" id="quickOut" type="button"><span data-icon="out"></span><span class="hide-sm">Salida</span></button>
+        </div>
+      </header>
+
+      <section id="view" class="view" tabindex="-1" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <div id="modalRoot"></div>
+  <div id="toastRoot" class="toast-root" aria-live="assertive"></div>
+
+  <noscript>Esta aplicación necesita JavaScript activado.</noscript>
+
+  <!-- Núcleo -->
+  <script src="js/utils.js"></script>
+  <script src="js/images.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <!-- Componentes -->
+  <script src="js/components/product-form.js"></script>
+  <script src="js/components/product-detail.js"></script>
+  <script src="js/components/movement-form.js"></script>
+  <script src="js/components/document.js"></script>
+  <!-- Vistas -->
+  <script src="js/views/dashboard.js"></script>
+  <script src="js/views/inventory.js"></script>
+  <script src="js/views/movements.js"></script>
+  <script src="js/views/suppliers.js"></script>
+  <script src="js/views/settings.js"></script>
+  <!-- Arranque -->
+  <script src="js/app.js"></script>
+</body>
+</html>
