@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Descargar el código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Crear .env de CI (contraseña aleatoria, sin secretos en el repositorio)
         run: |
