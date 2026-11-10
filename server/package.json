@@ -1,0 +1,21 @@
+{
+  "name": "multimateriales-los-alpes",
+  "version": "1.0.0",
+  "description": "Inventario de bodega de materiales de construcción: API REST (Express) + PostgreSQL + interfaz web.",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/unit/*.test.js",
+    "test:integration": "node --test test/integration/*.test.js",
+    "test:unit:ci": "node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=/tmp/unit.xml test/unit/*.test.js",
+    "test:integration:ci": "node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=/tmp/integration.xml test/integration/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "4.21.2",
+    "pg": "8.13.1"
+  }
+}
