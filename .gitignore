@@ -1,0 +1,35 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# Dependencias y builds (para fases futuras)
+node_modules/
+dist/
+build/
+
+# Variables de entorno (credenciales de la base de datos: NUNCA subirlas)
+.env
+.env.*
+!.env.example
+
+# Respaldos exportados desde la app (pueden contener datos reales)
+respaldo-*.json
+inventario-*.csv
+movimientos-*.csv
+
+# Logs
+*.log
+
+# Configuración local de herramientas
+.claude/
+
+# Reportes de pruebas y registros de CI
+reports/
+docker-compose.log
