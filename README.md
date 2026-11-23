@@ -176,7 +176,9 @@ Las reglas de negocio se aplican en el servidor y cada movimiento se guarda en u
 │   └── test/
 │       ├── unit/             # Pruebas unitarias (sin base de datos)
 │       └── integration/      # Pruebas contra la API y PostgreSQL reales
-├── jenkins/                  # Jenkins en Docker (2.ª entrega)
+├── db/Dockerfile             # Imagen propia de PostgreSQL (servicio db)
+├── scripts/                  # Verificación de comunicación app ↔ db
+├── jenkins/                  # Jenkins en Docker: Dockerfile, plugins.txt, casc.yaml (JCasC)
 └── docs/JENKINS.md           # Requisitos y guía de implementación de Jenkins
 ```
 
@@ -210,9 +212,18 @@ docker run --rm --network multimateriales_backend -e API_URL=http://app:3000 mul
 
 El archivo `.github/workflows/ci.yml` se ejecuta en cada *push* y *pull request*: pruebas unitarias, `docker compose build`, `docker compose up`, verificación de la comunicación `app → db` por nombre de servicio, pruebas de integración y limpieza. Crea un `.env` temporal con una contraseña aleatoria, así no se guarda ningún secreto en el repositorio.
 
-### Jenkins (2.ª entrega)
+### Jenkins
 
-El `Jenkinsfile` ya está listo: descarga el código → pruebas unitarias → construye la imagen → levanta los contenedores → pruebas de integración → publica resultados → limpia. Ver **[docs/JENKINS.md](docs/JENKINS.md)**.
+Jenkins corre en su propio contenedor (`jenkins/jenkins:2.580.2-lts-jdk21`, con volumen `jenkins_home`) y se configura como código (JCasC): usuario, credencial y job. El `Jenkinsfile` tiene las etapas **Checkout → Build → Test** y un bloque **post**, y se dispara solo con **Poll SCM** (cada 2 minutos) cuando hay commits nuevos en GitHub.
+
+```bash
+cd jenkins
+cp .env.example .env            # define JENKINS_ADMIN_PASSWORD y CI_DB_PASSWORD
+docker compose up -d --build
+# http://localhost:8090  (usuario y clave del jenkins/.env)
+```
+
+Para verificar a mano la comunicación entre contenedores: `sh scripts/verificar-comunicacion.sh`. Más detalles en **[docs/JENKINS.md](docs/JENKINS.md)**.
 
 ## Publicar en GitHub
 
@@ -230,7 +241,7 @@ git push -u origin main
 - [x] Aplicación web completa.
 - [x] API REST + PostgreSQL en contenedores Docker comunicados.
 - [x] Pruebas automatizadas y `Jenkinsfile`.
-- [ ] Jenkins en funcionamiento (2.ª entrega).
+- [x] Jenkins en funcionamiento con pipeline como código (2.ª entrega).
 - [ ] Usuarios, inicio de sesión y roles.
 - [ ] Despliegue en la nube (por ejemplo, contenedor `app` + PostgreSQL de Supabase cambiando `DATABASE_URL` y `PGSSL=true`).
 - [ ] Control de vencimientos por lote (FIFO) y códigos de barras / QR.
