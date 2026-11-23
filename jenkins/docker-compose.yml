@@ -1,8 +1,12 @@
 # ==========================================================================
-# Jenkins local (segunda entrega). Uso, desde la carpeta jenkins/:
-#   docker compose up -d --build
-#   Abrir http://localhost:8090
-#   Contraseña inicial: docker compose exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+# Jenkins para MultiMateriales Los Alpes (contenedor jenkins/jenkins LTS)
+#
+# Uso, desde la carpeta jenkins/:
+#   1) cp .env.example .env      (define usuario y claves)
+#   2) docker compose up -d --build
+#   3) Abrir http://localhost:8090 e iniciar sesión con el usuario del .env
+#
+# Este archivo NO contiene contraseñas: se cargan del .env con env_file.
 # Ver docs/JENKINS.md
 # ==========================================================================
 name: jenkins
@@ -10,18 +14,22 @@ name: jenkins
 services:
   jenkins:
     build: .
-    image: multimateriales-jenkins:lts
+    image: multimateriales-jenkins:2.580.2
     restart: unless-stopped
-    # root para poder usar el socket de Docker Desktop (solo entorno local/académico).
+    # root: necesario para usar el socket de Docker Desktop (entorno local/académico).
     user: root
-    ports:
-      - "127.0.0.1:8090:8080"
-    volumes:
-      - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
     environment:
       TZ: America/Bogota
-      JAVA_OPTS: -Duser.timezone=America/Bogota
+    ports:
+      # Interfaz web solo en este equipo (no expuesta a la red).
+      - "127.0.0.1:8090:8080"
+    volumes:
+      # Volumen persistente: configuración, jobs e historial de builds.
+      - jenkins_home:/var/jenkins_home
+      # Acceso al motor Docker del equipo para construir los contenedores.
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   jenkins_home:

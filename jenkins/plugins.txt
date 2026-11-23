@@ -1,0 +1,28 @@
+# Plugins de Jenkins para el pipeline de MultiMateriales Los Alpes.
+# Se instalan al construir la imagen (jenkins-plugin-cli) junto con sus dependencias.
+
+# --- Pipeline como código ---
+workflow-aggregator
+pipeline-stage-view
+pipeline-graph-view
+
+# --- Git / GitHub ---
+git
+github
+
+# --- Docker ---
+docker-workflow
+
+# --- Credenciales (nunca escritas en el código) ---
+credentials
+credentials-binding
+plain-credentials
+
+# --- Configuración como código (JCasC) y creación del job ---
+configuration-as-code
+job-dsl
+
+# --- Resultados y utilidades ---
+junit
+timestamper
+ws-cleanup

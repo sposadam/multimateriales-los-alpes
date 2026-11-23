@@ -1,0 +1,72 @@
+# ==========================================================================
+# Jenkins Configuration as Code (JCasC) — MultiMateriales Los Alpes
+#
+# Configura Jenkins al arrancar, sin pasos manuales en la interfaz:
+#   - usuario administrador (clave desde variable de entorno, archivo .env)
+#   - credencial "multimateriales-db-password" (Secret text) en el almacén
+#     de credenciales de Jenkins
+#   - job de tipo Pipeline que lee el Jenkinsfile del repositorio (SCM)
+#     y consulta GitHub cada 2 minutos (Poll SCM)
+#
+# Los valores ${...} se leen de las variables de entorno del contenedor
+# (jenkins/.env, que NO se sube al repositorio).
+# ==========================================================================
+jenkins:
+  systemMessage: "Jenkins · MultiMateriales Los Alpes — Integración continua (configurado como código con JCasC)"
+  numExecutors: 2
+  mode: NORMAL
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          name: "Administrador"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "http://localhost:8090/"
+    adminAddress: "Jenkins MultiMateriales <jenkins@localhost>"
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              scope: GLOBAL
+              id: "multimateriales-db-password"
+              description: "Clave de PostgreSQL para el entorno de pruebas del pipeline"
+              secret: "${CI_DB_PASSWORD}"
+
+jobs:
+  - script: >
+      pipelineJob('multimateriales-los-alpes') {
+        displayName('MultiMateriales Los Alpes · CI')
+        description('Pipeline de integración continua: Checkout → Build (imágenes app y db) → Test (pruebas unitarias, docker compose y comunicación app ↔ db). Definido en el Jenkinsfile del repositorio.')
+        logRotator { numToKeep(30) }
+        properties {
+          pipelineTriggers {
+            triggers {
+              pollSCM { scmpoll_spec('H/2 * * * *') }
+            }
+          }
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/sposadam/multimateriales-los-alpes.git')
+                  name('origin')
+                }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }

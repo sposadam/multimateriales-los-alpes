@@ -1,9 +1,13 @@
 # ==========================================================================
-# Jenkins con Docker CLI y Docker Compose (para la segunda entrega).
-# Jenkins usa el motor de Docker del equipo anfitrión a través del socket,
-# así puede construir y levantar los contenedores del proyecto.
+# Imagen de Jenkins para MultiMateriales Los Alpes
+#
+# - Base oficial jenkins/jenkins LTS con versión FIJA y huella sha256.
+# - Docker CLI + plugin Docker Compose: Jenkins construye y levanta los
+#   contenedores usando el motor Docker del equipo (socket montado).
+# - Plugins instalados desde plugins.txt.
+# - Configuración como código (JCasC) desde casc.yaml: sin asistente inicial.
 # ==========================================================================
-FROM jenkins/jenkins:lts-jdk21
+FROM jenkins/jenkins:2.580.2-lts-jdk21@sha256:74401de6a6f92e1afe1b02d1c8e3d0c33f263bfb5275dd8813f9150355f2367b
 
 USER root
 RUN apt-get update \
@@ -18,11 +22,11 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 USER jenkins
 
-# Plugins necesarios para el Jenkinsfile del proyecto.
-RUN jenkins-plugin-cli --plugins \
-    workflow-aggregator \
-    git \
-    github \
-    junit \
-    timestamper \
-    ws-cleanup
+# Sin asistente de instalación: todo se configura con JCasC.
+ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false -Duser.timezone=America/Bogota" \
+    CASC_JENKINS_CONFIG=/usr/share/jenkins/casc/casc.yaml
+
+COPY --chown=jenkins:jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt
+
+COPY --chown=jenkins:jenkins casc.yaml /usr/share/jenkins/casc/casc.yaml
