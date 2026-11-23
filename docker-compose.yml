@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: db/Dockerfile
-    image: multimateriales-db:1.0.0
+    image: multimateriales-db:${IMAGE_TAG:-1.0.0}
     restart: unless-stopped
     # Nombre de la base, usuario y clave se leen del archivo .env
     env_file:
@@ -42,7 +42,7 @@ services:
     build:
       context: .
       target: runtime
-    image: multimateriales-app:1.0.0
+    image: multimateriales-app:${IMAGE_TAG:-1.0.0}
     restart: unless-stopped
     depends_on:
       db:
