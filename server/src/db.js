@@ -24,13 +24,14 @@ const config = process.env.DATABASE_URL
   : {
     host: process.env.DB_HOST || 'db', // nombre del servicio en docker-compose.yml
     port: parseInt(process.env.DB_PORT, 10) || 5432,
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD
+    // Credenciales cargadas desde el archivo .env (env_file en docker-compose.yml)
+    database: process.env.DB_NAME || process.env.POSTGRES_DB,
+    user: process.env.DB_USER || process.env.POSTGRES_USER,
+    password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD
   };
 
 if (!process.env.DATABASE_URL && !config.password) {
-  console.warn('[db] DB_PASSWORD no está definida. Revisa el archivo .env.');
+  console.warn('[db] No hay contraseña de base de datos. Revisa el archivo .env.');
 }
 console.log('[db] Servidor de base de datos: ' + (process.env.DATABASE_URL ? '(DATABASE_URL)' : config.host + ':' + config.port + '/' + config.database));
 

@@ -2,27 +2,31 @@
 # MultiMateriales Los Alpes — Contenedores
 #
 #   app      Node.js + Express (API + página web)   http://localhost:8080
-#   db       PostgreSQL 16 (datos en un volumen)    solo red interna
-#   adminer  Visor web de la base de datos          http://localhost:8081
+#   db       PostgreSQL 16.6 (datos en un volumen)  solo red interna
+#   adminer  Visor web de la base de datos          http://127.0.0.1:8081
 #
-# Los tres se comunican por la red interna "backend". El contenedor "app"
-# encuentra a la base de datos por su nombre de servicio: "db".
+# Los servicios se comunican por la red propia "backend". El contenedor "app"
+# encuentra a la base de datos por su NOMBRE DE SERVICIO: "db".
 #
-# Uso:  1) cp .env.example .env   (y cambia la contraseña)
+# Seguridad: este archivo NO contiene contraseñas. Las credenciales de la
+# base de datos se cargan desde el archivo .env (env_file), que está en
+# .gitignore. En el repositorio solo se publica la plantilla .env.example.
+#
+# Uso:  1) cp .env.example .env   (y define tu contraseña)
 #       2) docker compose up -d --build     (ver README.md)
 # ==========================================================================
 name: multimateriales
 
 services:
   db:
-    image: postgres:16.6-alpine3.21
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    image: multimateriales-db:1.0.0
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-inventario}
-      POSTGRES_USER: ${POSTGRES_USER:-inventario}
-      # Obligatoria: se lee del archivo .env (que NO se sube al repositorio).
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD. Copia .env.example a .env y define la clave}
-      TZ: America/Bogota
+    # Nombre de la base, usuario y clave se leen del archivo .env
+    env_file:
+      - .env
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -43,16 +47,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Credenciales de la base de datos desde el archivo .env
+    env_file:
+      - .env
     environment:
       # Comunicación entre contenedores: se usa el NOMBRE DEL SERVICIO "db"
       # (DNS interno de la red de Docker), no localhost ni una IP fija.
       DB_HOST: db
       DB_PORT: "5432"
-      DB_NAME: ${POSTGRES_DB:-inventario}
-      DB_USER: ${POSTGRES_USER:-inventario}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD. Copia .env.example a .env y define la clave}
-      SEED_DEMO: ${SEED_DEMO:-true}
-      ADMINER_URL: http://localhost:${ADMINER_PORT:-8081}/?pgsql=db&username=${POSTGRES_USER:-inventario}&db=${POSTGRES_DB:-inventario}
+      ADMINER_URL: http://localhost:${ADMINER_PORT:-8081}/?pgsql=db
       TZ: America/Bogota
     ports:
       - "${APP_PORT:-8080}:3000"
@@ -60,7 +63,7 @@ services:
       - backend
 
   adminer:
-    image: adminer:4.8.1
+    image: adminer:4.8.1@sha256:34d37131366c5aa84e1693dbed48593ed6f95fb450b576c1a7a59d3a9c9e8802
     restart: unless-stopped
     depends_on:
       - db

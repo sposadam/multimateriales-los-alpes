@@ -77,7 +77,7 @@ cd multimateriales-los-alpes
 cp .env.example .env
 ```
 
-(En CMD de Windows usa `copy .env.example .env`.) Edita `.env` y cambia `POSTGRES_PASSWORD` por una clave tuya. Sin este archivo, `docker compose up` se detiene con el mensaje *Falta POSTGRES_PASSWORD*. El archivo `.env` **nunca se sube a GitHub** (está en `.gitignore`); en el repositorio solo va la plantilla `.env.example`.
+(En CMD de Windows usa `copy .env.example .env`.) Edita `.env` y cambia `POSTGRES_PASSWORD` por una clave tuya. Las credenciales se cargan en los contenedores con `env_file`, así que `docker-compose.yml` no contiene ninguna contraseña; si la clave queda vacía, PostgreSQL no inicia. El archivo `.env` **nunca se sube a GitHub** (está en `.gitignore`); en el repositorio solo va la plantilla `.env.example`.
 
 ### 4. Encender la aplicación
 
