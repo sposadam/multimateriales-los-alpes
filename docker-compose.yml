@@ -53,7 +53,7 @@ services:
     environment:
       # Comunicación entre contenedores: se usa el NOMBRE DEL SERVICIO "db"
       # (DNS interno de la red de Docker), no localhost ni una IP fija.
-      DB_HOST: db
+      DB_HOST: localhost
       DB_PORT: "5432"
       ADMINER_URL: http://localhost:${ADMINER_PORT:-8081}/?pgsql=db
       TZ: America/Bogota
